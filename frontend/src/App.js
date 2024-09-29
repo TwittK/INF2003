@@ -90,26 +90,66 @@ function App() {
 
 function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
     const pageNumbers = [];
+    const maxPageNumbersToShow = 10; // Maximum number of page numbers to show
+    const totalPageCount = Math.ceil(totalBooks / booksPerPage);
 
     // Ensure pagination starts from 1
-    for (let i = 1; i <= Math.ceil(totalBooks / booksPerPage); i++) {
+    for (let i = 1; i <= totalPageCount; i++) {
         pageNumbers.push(i);
     }
+
+    // Calculate the range of page numbers to display
+    const startPage = Math.max(1, currentPage - Math.floor(maxPageNumbersToShow / 2));
+    const endPage = Math.min(totalPageCount, startPage + maxPageNumbersToShow - 1);
+
+    const visiblePages = pageNumbers.slice(startPage - 1, endPage);
+
+    const handlePrevious = () => {
+        if (currentPage > 1) {
+            paginate(currentPage - 1);
+        }
+    };
+
+    const handleNext = () => {
+        if (currentPage < totalPageCount) {
+            paginate(currentPage + 1);
+        }
+    };
 
     return (
         <nav className="pagination">
             <ul className="pagination-list">
-                {pageNumbers.map(number => (
+                <li className="page-item">
+                    <a
+                        onClick={handlePrevious}
+                        href="#!"
+                        className="page-link"
+                        style={{ visibility: currentPage === 1 ? 'hidden' : 'visible' }} // Hide if on first page
+                    >
+                        Previous
+                    </a>
+                </li>
+                {visiblePages.map(number => (
                     <li key={number} className="page-item">
-                        <a 
-                            onClick={() => paginate(number)} 
-                            href="!#" 
+                        <a
+                            onClick={() => paginate(number)}
+                            href="#!"
                             className={`page-link ${number === currentPage ? 'active' : ''}`}
                         >
                             {number}
                         </a>
                     </li>
                 ))}
+                <li className="page-item">
+                    <a
+                        onClick={handleNext}
+                        href="#!"
+                        className="page-link"
+                        style={{ visibility: currentPage === totalPageCount ? 'hidden' : 'visible' }} // Hide if on last page
+                    >
+                        Next
+                    </a>
+                </li>
             </ul>
         </nav>
     );

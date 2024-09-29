@@ -55,8 +55,10 @@
 }
 
 .pagination-list {
+  display: flex;
   list-style: none;
   padding: 0;
+  align-items: center; /* Align the pagination buttons and numbers vertically */
 }
 
 .page-item {
@@ -82,4 +84,17 @@
 .page-link:hover {
   background-color: #0056b3;
   color: white;
+}
+
+.pagination .page-item:first-child .page-link {
+  margin-right: 10px; /* Add space between 'Previous' and first page number */
+}
+
+.pagination .page-item:last-child .page-link {
+  margin-left: 10px; /* Add space between last page number and 'Next' */
+}
+
+.pagination .page-item a {
+  min-width: 50px; /* Make sure the 'Previous' and 'Next' buttons are of similar width */
+  text-align: center;
 }
