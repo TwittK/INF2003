@@ -7,14 +7,52 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding: 20px;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
 
+.header-content {
+    font-size: 1em;
+    opacity: 0.75;
+}
+
+.search-bar-center {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
 .App-link {
   color: #61dafb;
+}
+
+.navbar {
+    width: 100%;
+    background-color: #333; /* Dark background for the navbar */
+    color: white;
+    padding: 0.5rem 1rem; /* Reduced padding */
+    display: flex;
+    justify-content: space-between; /* Adjust this based on your nav content */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adds depth */
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar li {
+    padding: 0 15px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
 }
 
 .book-grid {
@@ -97,4 +135,9 @@
 .pagination .page-item a {
   min-width: 50px; /* Make sure the 'Previous' and 'Next' buttons are of similar width */
   text-align: center;
+}
+
+.location-list {
+    list-style-type: none; /* Removes bullet points */
+    padding: 0;  /* Removes default padding */
 }
