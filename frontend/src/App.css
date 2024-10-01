@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box; /* Ensures padding and border are included in the width */
+}
+
 .App {
   text-align: center;
 } 
@@ -37,6 +41,7 @@
     display: flex;
     justify-content: space-between; /* Adjust this based on your nav content */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adds depth */
+    border-bottom: 1px solid #dee2e6;
 }
 
 .navbar ul {
@@ -48,11 +53,32 @@
 
 .navbar li {
     padding: 0 15px;
+    flex-shrink: 0; /* Prevent navbar items from shrinking */
+    white-space: nowrap; /* Ensure text doesn't wrap */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Show ellipsis for overflowed text */
 }
 
-.navbar a {
-    color: white;
+.nav-links a {
+    margin-right: 20px;
+    padding: 5px 10px; 
     text-decoration: none;
+    color: white;
+}
+
+.auth-links a {
+    padding: 5px 10px; 
+    text-decoration: none;
+    color: white;
+    margin-right: 0; /* No right margin on the last element */
+}
+
+.nav-links a:last-child, .auth-links a:last-child {
+    margin-right: 10px;
+}
+
+.nav-links, .auth-links {
+    display: flex;
 }
 
 .book-grid {
