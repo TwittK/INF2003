@@ -8,10 +8,15 @@ function Favourites({ user }) {
             alert('You need to be logged in to view your favourites.');
             return;
         }
-
+    
         // Fetch favourite books for the logged-in user
         fetch(`http://localhost:5000/favourites/${user.userID}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => setFavouriteBooks(data))
             .catch(error => console.error('Error fetching favourite books:', error));
     }, [user]);

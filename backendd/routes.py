@@ -43,17 +43,18 @@ def configure_routes(app):
         conn.close()
         return jsonify(loans)
 
-    def get_favourites(user_id):
+    @app.route('/favourites/<int:userID>', methods=['GET'])
+    def get_favourites(userID):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # Get all favourite books for this user
+        # Fetch favourite books for the given userID
         cursor.execute("""
         SELECT b.bookID, b.title, b.author 
         FROM favourite f
         INNER JOIN books b ON f.bookID = b.bookID 
         WHERE f.userID = %s
-    """, (user_id,))
+        """, (userID,))
     
         favourites = cursor.fetchall()
         cursor.close()
