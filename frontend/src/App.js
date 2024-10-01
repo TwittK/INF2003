@@ -21,15 +21,19 @@ function App() {
             <div className="App">
                 <Navbar user={user} onLogout={handleLogout} />
                 <Routes>
-                    {/* Ensure user is passed to Books */}
-                    <Route path="/" element={user ? <Books user={user} /> : <Navigate to="/login" />} />
-                    
-                    <Route path="/locations" element={<Locations />} />
+                    {/* Always show the Books page as the default ("/") */}
+                    <Route path="/" element={<Books user={user} />} />
                     
                     {/* Favourites route: Only accessible if the user is logged in */}
                     <Route path="/favourites" element={user ? <Favourites user={user} /> : <Navigate to="/login" />} />
-                    
+
+                    {/* Locations route */}
+                    <Route path="/locations" element={<Locations />} />
+
+                    {/* Login route: Pass setUser to store logged-in user info */}
                     <Route path="/login" element={<Login setUser={setUser} />} />
+
+                    {/* Register route */}
                     <Route path="/register" element={<Register />} />
                 </Routes>
             </div>
