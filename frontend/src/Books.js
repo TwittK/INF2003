@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-function Books() {
+function Books({ user }) {
     const [books, setBooks] = useState([]);
-
     const [searchQuery, setSearchQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1); // Make sure it starts from 1
-    const booksPerPage = 10; // Number of books per page
+    const [currentPage, setCurrentPage] = useState(1);
+    const booksPerPage = 10;
 
-    // Fetch books
+    // Fetch books from backend
     useEffect(() => {
         fetch('http://localhost:5000/books')
             .then(response => response.json())
-            .then(data => {setBooks(data);})
+            .then(data => setBooks(data))
             .catch(error => console.error('Error fetching books:', error));
-    }, []);
+            console.log("Logged-in user:", user);  // Check if user is being passed correctly
+    }, [user]);
 
     // Filter the data based on search query
     const filteredData = books.filter(item => {
@@ -23,11 +23,37 @@ function Books() {
         const ISBN = item.ISBN ? item.ISBN : "";
 
         return (
-            title.includes(searchQuery.toLowerCase()) || // Search by title
-            author.includes(searchQuery.toLowerCase()) || // Search by author
-            ISBN.includes(searchQuery) // Search by ISBN
+            title.includes(searchQuery.toLowerCase()) || 
+            author.includes(searchQuery.toLowerCase()) || 
+            ISBN.includes(searchQuery)
         );
     });
+    const addToFavourites = (bookId) => {
+        if (!user || !user.userID) {
+            alert('You need to be logged in to add favourites.');
+            return;
+        }
+    
+        fetch('http://localhost:5000/favourite', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                book_id: bookId,
+                user_id: user.userID,  // Ensure user.id exists
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Book added to favourites!');
+            } else {
+                alert('Error adding book to favourites: ' + data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    };
 
     // Pagination logic: Calculate the books to display based on the current page
     const indexOfLastBook = currentPage * booksPerPage;
@@ -76,6 +102,10 @@ function Books() {
                             className="App-link">
                             View Details
                         </a>
+                        {/* Add to Favourites Button */}
+                        <button onClick={() => addToFavourites(item.bookID)}>
+                            Add to Favourites
+                        </button>
                     </div>
                 ))}
             </div>
@@ -93,15 +123,13 @@ function Books() {
 // Pagination Component
 function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
     const pageNumbers = [];
-    const maxPageNumbersToShow = 10; // Maximum number of page numbers to show
+    const maxPageNumbersToShow = 10;
     const totalPageCount = Math.ceil(totalBooks / booksPerPage);
 
-    // Ensure pagination starts from 1
     for (let i = 1; i <= totalPageCount; i++) {
         pageNumbers.push(i);
     }
 
-    // Calculate the range of page numbers to display
     const startPage = Math.max(1, currentPage - Math.floor(maxPageNumbersToShow / 2));
     const endPage = Math.min(totalPageCount, startPage + maxPageNumbersToShow - 1);
 
@@ -127,7 +155,7 @@ function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
                         onClick={handlePrevious}
                         href="#!"
                         className="page-link"
-                        style={{ visibility: currentPage === 1 ? 'hidden' : 'visible' }} // Hide if on first page
+                        style={{ visibility: currentPage === 1 ? 'hidden' : 'visible' }}
                     >
                         Previous
                     </a>
@@ -148,7 +176,7 @@ function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
                         onClick={handleNext}
                         href="#!"
                         className="page-link"
-                        style={{ visibility: currentPage === totalPageCount ? 'hidden' : 'visible' }} // Hide if on last page
+                        style={{ visibility: currentPage === totalPageCount ? 'hidden' : 'visible' }}
                     >
                         Next
                     </a>

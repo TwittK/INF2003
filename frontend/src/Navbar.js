@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-function Navbar() {
+function Navbar({ user, onLogout }) {
     return (
         <nav className="navbar">
             <div className="nav-links">
@@ -10,9 +10,19 @@ function Navbar() {
                 <Link to="/loans">Loans</Link>
                 <Link to="/favourites">Favourites</Link>
             </div>
+            
             <div className="auth-links">
-                <Link to="/login">Log in</Link>
-                <Link to="/register">Register</Link>
+                {user ? (
+                    <>
+                        <span>Welcome, {user.name}</span> {/* Display user's name */}
+                        <button onClick={onLogout}>Logout</button> {/* Logout button */}
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login">Log in</Link> {/* Display Login link when user is not logged in */}
+                        <Link to="/register">Register</Link> {/* Display Register link when user is not logged in */}
+                    </>
+                )}
             </div>
         </nav>
     );
