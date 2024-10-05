@@ -57,6 +57,34 @@ function Books({ user }) {
         .catch(error => console.error('Error:', error));
     };
 
+    // Loan book function
+    const loanBook = (bookId) => {
+        if (!user || !user.userID) {
+            alert('You need to be logged in to loan books.');
+            return;
+        }
+
+        fetch('http://localhost:5000/loan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                book_id: bookId,
+                user_id: user.userID,  // Ensure userID exists and is passed correctly
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Book loaned successfully!');
+            } else {
+                alert('Error loaning book: ' + data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    };
+
     // Pagination logic: Calculate the books to display based on the current page
     const indexOfLastBook = currentPage * booksPerPage;
     const indexOfFirstBook = indexOfLastBook - booksPerPage;
@@ -97,6 +125,12 @@ function Books({ user }) {
                         <p><strong>Language:</strong> {item.language || "N/A"}</p>
                         <p><strong>Price:</strong> ${item.price || "N/A"}</p>
                         <p><strong>Publisher:</strong> {item.publisher || "Unknown"}</p>
+
+                        {/* Show Available only for Admin */}
+                        {user && user.userprivilege === 'ADMIN' && (
+                            <p><strong>Available:</strong> {item.available > 0 ? item.available : "Not Available"}</p>
+                        )}
+
                         <a 
                             href={item.url || "#"}  // Use the Url field if available
                             target="_blank" 
@@ -107,6 +141,10 @@ function Books({ user }) {
                         {/* Add to Favourites Button */}
                         <button onClick={() => addToFavourites(item.bookID)}>
                             Add to Favourites
+                        </button>
+                        {/* Loan Button */}
+                        <button onClick={() => loanBook(item.bookID)} disabled={item.available <= 0}>
+                            Loan Book
                         </button>
                     </div>
                 ))}

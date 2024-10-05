@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from db import get_db_connection
+import datetime
+
 
 def configure_routes(app):
     # Existing routes
@@ -138,4 +140,122 @@ def configure_routes(app):
         else:
             return jsonify({"success": False, "error": "Invalid credentials"}), 401
         
+    @app.route('/loan', methods=['POST'])
+    def loan_book():
+        data = request.get_json()
+        user_id = data.get('user_id')
+        book_id = data.get('book_id')
+
+        if not user_id or not book_id:
+            return jsonify({"success": False, "error": "Missing user_id or book_id"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Set borrowdate to current date and duedate to one month from now
+            # Set borrowdate to current date and duedate to one month from now
+            borrow_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            due_date = (datetime.datetime.now() + datetime.timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
+
+            # Insert loan record into the 'loan' table (without locID)
+            cursor.execute("""
+                INSERT INTO loan (userID, bookID, loanstat, borrowdate, duedate) 
+                VALUES (%s, %s, 'on loan', %s, %s)
+                """, (user_id, book_id, borrow_date, due_date))
+
+            # Update the books table to reduce the available quantity
+            cursor.execute("UPDATE books SET available = available - 1 WHERE bookID = %s", (book_id,))
+        
+            conn.commit()
+            return jsonify({"success": True, "message": "Book loaned successfully!"}), 201
+        except Exception as e:
+            conn.rollback()
+            return jsonify({"success": False, "error": str(e)}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
+    @app.route('/loans/<int:user_id>', methods=['GET'])
+    def get_user_loans(user_id):
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch loan details along with the book title and loanID
+        cursor.execute("""
+        SELECT l.loanID, l.bookID, l.userID, l.borrowdate, l.duedate, l.loanstat, b.title
+        FROM loan l
+        JOIN books b ON l.bookID = b.bookID
+        WHERE l.userID = %s AND l.loanstat = 'on loan'
+        """, (user_id,))
+        
+        loans = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return jsonify(loans)
+
+    
+    # Route to return a loaned book
+    @app.route('/return', methods=['POST'])
+    def return_book():
+        data = request.get_json()
+        loan_id = data.get('loan_id')
+        book_id = data.get('book_id')
+        user_id = data.get('user_id')
+
+        if not loan_id or not book_id or not user_id:
+            return jsonify({"success": False, "error": "Missing loan_id, book_id, or user_id"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Update loan status to 'returned'
+            cursor.execute("""
+                UPDATE loan 
+                SET loanstat = 'returned' 
+                WHERE loanID = %s AND bookID = %s AND userID = %s
+            """, (loan_id, book_id, user_id))
+
+            # Increment the available count of the book
+            cursor.execute("""
+                UPDATE books 
+                SET available = available + 1 
+                WHERE bookID = %s
+            """, (book_id,))
+
+            conn.commit()
+            return jsonify({"success": True, "message": "Book returned successfully!"}), 200
+        except Exception as e:
+            conn.rollback()
+            return jsonify({"success": False, "error": str(e)}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
+
+    @app.route('/admin/loans', methods=['GET'])
+    def get_all_loans():
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        try:
+            # Query to fetch all loans with details
+            cursor.execute("""
+                SELECT l.loanID, l.userID, u.name as username, l.bookID, b.title as booktitle, l.borrowdate, l.duedate, l.loanstat
+                FROM loan l
+                JOIN user u ON l.userID = u.userID
+                JOIN books b ON l.bookID = b.bookID
+                ORDER BY l.borrowdate DESC
+            """)
+            
+            loans = cursor.fetchall()
+            return jsonify(loans), 200
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+        finally:
+            cursor.close()
+            conn.close()
+
 

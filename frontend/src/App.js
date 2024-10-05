@@ -6,6 +6,8 @@ import Locations from './Locations';
 import Favourites from './Favourites';  
 import Login from './Login'; 
 import Register from './Register'; 
+import AdminLoans from './AdminLoans';
+import Loans from './Loans';   
 import './App.css';
 
 function App() {
@@ -30,11 +32,17 @@ function App() {
                     {/* Locations route */}
                     <Route path="/locations" element={<Locations />} />
 
+                    {/* Loans route: Only accessible if the user is logged in */}
+                    <Route path="/loans" element={user ? <Loans user={user} /> : <Navigate to="/login" />} />
+
                     {/* Login route: Pass setUser to store logged-in user info */}
                     <Route path="/login" element={<Login setUser={setUser} />} />
 
                     {/* Register route */}
                     <Route path="/register" element={<Register />} />
+
+                    {/* Admin route: Accessible only to admins */}
+                    <Route path="/admin/loans" element={user && user.userprivilege === 'ADMIN' ? <AdminLoans user={user} /> : <Navigate to="/login" />} />
                 </Routes>
             </div>
         </Router>
