@@ -126,9 +126,23 @@ function Books({ user }) {
                         <p><strong>Price:</strong> ${item.price || "N/A"}</p>
                         <p><strong>Publisher:</strong> {item.publisher || "Unknown"}</p>
 
-                        {/* Show Available only for Admin */}
-                        {user && user.userprivilege === 'ADMIN' && (
-                            <p><strong>Available:</strong> {item.available > 0 ? item.available : "Not Available"}</p>
+                        {/* Availability Section */}
+                        {user && user.userprivilege === 'ADMIN' ? (
+                            <p><strong>Available:</strong> 
+                                {item.available > 0 ? (
+                                    <span>{item.available} Available</span>
+                                ) : (
+                                    <span style={{ color: 'red' }}>Not Available</span>
+                                )}
+                            </p>
+                        ) : (
+                            <p><strong>Available:</strong> 
+                                {item.available > 0 ? (
+                                    <span>Available</span>
+                                ) : (
+                                    <span style={{ color: 'red' }}>Not Available</span>
+                                )}
+                            </p>
                         )}
 
                         <a 
@@ -143,7 +157,10 @@ function Books({ user }) {
                             Add to Favourites
                         </button>
                         {/* Loan Button */}
-                        <button onClick={() => loanBook(item.bookID)} disabled={item.available <= 0}>
+                        <button 
+                            onClick={() => loanBook(item.bookID)} 
+                            disabled={item.available <= 0}
+                        >
                             Loan Book
                         </button>
                     </div>
