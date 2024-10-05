@@ -2,17 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 function Loans({ user }) {
     const [loans, setLoans] = useState([]);
+    const [loanHistory, setLoanHistory] = useState([]);
 
-    // Fetch the loans for the logged-in user
+    // Fetch both current loans and loan history for the logged-in user
     useEffect(() => {
         if (user && user.userID) {
-            fetch(`http://localhost:5000/loans/${user.userID}`)
+            fetch(`http://localhost:5000/loan_history/${user.userID}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Loans data:", data);  // Log the entire data returned from the backend
-                    setLoans(data);
+                    console.log("Loan data:", data);
+                    
+                    // Separate current loans (on loan) and loan history (returned)
+                    const currentLoans = data.filter(loan => loan.loanstat === 'on loan');
+                    const historyLoans = data.filter(loan => loan.loanstat === 'returned');
+
+                    setLoans(currentLoans);
+                    setLoanHistory(historyLoans);
                 })
-                .catch(error => console.error('Error fetching loans:', error));
+                .catch(error => console.error('Error fetching loan data:', error));
         }
     }, [user]);
 
@@ -26,28 +33,26 @@ function Loans({ user }) {
         });
     };
 
+    // Function to return the loaned book
     const returnBook = (loanId, bookId) => {
-        console.log("Returning book with the following details:");
-        console.log("Loan ID:", loanId);  // Ensure this is not undefined
-        console.log("Book ID:", bookId);
-        console.log("User ID:", user.userID);
-    
+        console.log("Returning book with the following details:", { loanId, bookId, userID: user.userID });
+
         fetch(`http://localhost:5000/return`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                loan_id: loanId,  // Ensure loanId is passed correctly
-                book_id: bookId,  // Ensure bookId is passed correctly
-                user_id: user.userID,  // Ensure userId is passed correctly
+                loan_id: loanId,
+                book_id: bookId,
+                user_id: user.userID,
             }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 alert('Book returned successfully!');
-                // Refresh loans after returning the book
+                // Remove the returned book from current loans
                 setLoans(loans.filter(loan => loan.loanID !== loanId));
             } else {
                 alert('Error returning book: ' + data.error);
@@ -55,18 +60,19 @@ function Loans({ user }) {
         })
         .catch(error => console.error('Error returning book:', error));
     };
-    
-    
 
     return (
         <div>
             <h1>Your Loans</h1>
+            
+            {/* Current Loans Section */}
+            <h2>Current Loans</h2>
             {loans.length === 0 ? (
-                <p>You have no loans at the moment.</p>
+                <p>You have no active loans at the moment.</p>
             ) : (
                 <div className="loan-list">
                     {loans.map((loan, index) => {
-                        console.log("Loan object:", loan); // Log the individual loan object
+                        console.log("Current loan object:", loan); // Check if loanID exists
                         return (
                             <div key={index} className="loan-card">
                                 <h3>{loan.title}</h3>
@@ -75,12 +81,32 @@ function Loans({ user }) {
                                 <p><strong>Status:</strong> {loan.loanstat}</p>
                                 {/* Return Button */}
                                 <button onClick={() => {
-                                    console.log("Loan ID being passed:", loan.loanID);  // Log loanID here
-                                    console.log("Book ID being passed:", loan.bookID);  // Log bookID here
+                                    console.log("Loan ID being passed:", loan.loanID);  // Ensure loan.loanID is not undefined
+                                    console.log("Book ID being passed:", loan.bookID);  // Ensure bookID is correct
                                     returnBook(loan.loanID, loan.bookID);  // Ensure loan.loanID is passed correctly
                                 }}>
                                     Return Book
                                 </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Loan History Section */}
+            <h2>Loan History</h2>
+            {loanHistory.length === 0 ? (
+                <p>You have no loan history at the moment.</p>
+            ) : (
+                <div className="loan-history-list">
+                    {loanHistory.map((loan, index) => {
+                        console.log("Loan history object:", loan);  // Check for loanID in history
+                        return (
+                            <div key={index} className="loan-card">
+                                <h3>{loan.title}</h3>
+                                <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
+                                <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
+                                <p><strong>Status:</strong> {loan.loanstat}</p>
                             </div>
                         );
                     })}

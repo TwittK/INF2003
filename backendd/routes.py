@@ -258,4 +258,25 @@ def configure_routes(app):
             cursor.close()
             conn.close()
 
+    @app.route('/loan_history/<int:user_id>', methods=['GET'])
+    def loan_history(user_id):
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Fetch all loans for the user, including both active and returned loans
+        cursor.execute("""
+        SELECT l.loanID, l.bookID, b.title, l.borrowdate, l.duedate, l.loanstat 
+        FROM loan l
+        JOIN books b ON l.bookID = b.bookID
+        WHERE l.userID = %s
+        ORDER BY l.borrowdate DESC
+        """, (user_id,))
+        
+        loans = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return jsonify(loans)
+
+
 
