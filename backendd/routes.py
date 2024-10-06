@@ -9,7 +9,35 @@ def configure_routes(app):
     def get_books():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM books")
+        # Get filter parameters from request args
+        search_query = request.args.get('search', '')
+        selected_format = request.args.get('format', '')
+        selected_language = request.args.get('language', '')
+        only_available = request.args.get('available', 'false')
+
+        # Build the SQL query dynamically based on the filters
+        query = """
+            SELECT * FROM books WHERE 1=1
+        """
+        params = []
+
+        if search_query:
+            query += " AND (title LIKE %s OR author LIKE %s OR ISBN LIKE %s)"
+            params.extend([f"%{search_query}%", f"%{search_query}%", f"%{search_query}%"])
+
+        if selected_format:
+            query += " AND format = %s"
+            params.append(selected_format)
+
+        if selected_language:
+            query += " AND language = %s"
+            params.append(selected_language)
+
+        if only_available.lower() == 'true':
+            query += " AND available > 0"
+
+        # Execute the query
+        cursor.execute(query, params)
         books = cursor.fetchall()
         cursor.close()
         conn.close()

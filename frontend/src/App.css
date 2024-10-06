@@ -20,13 +20,85 @@
 
 .header-content {
     font-size: 1em;
+    margin-bottom: 20px;
     opacity: 0.75;
+}
+
+.main-content {
+  display: flex;  /* Flexbox for layout */
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;  /* Center the content */
+  padding: 20px;
+  min-height: 60vh;
+}
+
+.sidebar {
+  width: 20%;  /* Make the sidebar smaller */
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.filters {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;  /* Reduced gap for neater look */
+  margin-top: 10px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 25px;  /* Adjust font size for labels */
+  margin-right: 10px;
+}
+
+.filter-item label {
+  /* font-weight: bold; */
+  margin-right: 10px;
+  margin-bottom: 5px;
+  font-size: 1.2rem;
+}
+
+.filter-item select, .filter-item input[type="checkbox"] {
+  padding: 5px;
+  font-size: 0.7em;
+  width: auto;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.filter-item input[type="checkbox"] {
+  transform: scale(1.2); /* Adjust checkbox size */
+  margin-top: 0;
+  margin-left: 5px;
+}
+
+/* Right side for search and book grid */
+.content-area {
+  flex-grow: 1;
+  padding-left: 20px;
 }
 
 .search-bar-center {
     display: flex;
     justify-content: center;
     margin: 20px 0;
+    width: 50%;
+}
+
+.search-bar-center input {
+  width: 60%; /* Makes the input wider */
+  padding: 10px;
+  font-size: 1em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 .App-link {
@@ -95,6 +167,11 @@
   border-radius: 10px;
   text-align: center;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.book-card:hover {
+  transform: scale(1.05); /* Slight hover effect */
 }
 
 .book-image {
@@ -110,6 +187,7 @@
 
 .book-card p {
   margin: 5px 0;
+  font-size: 0.85rem;
 }
 
 .pagination {

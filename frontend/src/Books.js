@@ -5,9 +5,35 @@ function Books({ user }) {
     const [books, setBooks] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedFormat, setSelectedFormat] = useState("");
+    const [selectedLanguage, setSelectedLanguage] = useState("");
+    const [onlyAvailable, setOnlyAvailable] = useState(false);
     const booksPerPage = 10;
 
     // Fetch books from backend
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                // Build query parameters
+                const queryParams = new URLSearchParams({
+                    search: searchQuery || '',
+                    format: selectedFormat || '',
+                    language: selectedLanguage || '',
+                    available: onlyAvailable ? 'true' : 'false'
+                });
+
+                // Fetch data from Flask backend
+                const response = await fetch(`http://localhost:5000/books?${queryParams.toString()}`);
+                const data = await response.json();
+                setBooks(data);  // Set fetched books data
+            } catch (error) {
+                console.error('Error fetching books:', error);
+            }
+        };
+
+        fetchBooks();
+    }, [searchQuery, selectedFormat, selectedLanguage, onlyAvailable]);
+
     useEffect(() => {
         fetch('http://localhost:5000/books')
             .then(response => response.json())
@@ -107,6 +133,37 @@ function Books({ user }) {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
+                </div>
+                {/* Filter UI */}
+                <div className="filters">
+                    <div className="filter-item">
+                        <label>Format:</label>
+                        <select value={selectedFormat} onChange={(e) => setSelectedFormat(e.target.value)}>
+                            <option value="">All</option>
+                            <option value="Paperback">Paperback</option>
+                            <option value="Hardcover">Hardcover</option>
+                            <option value="eBook">eBook</option>
+                        </select>
+                    </div>
+
+                    <div className="filter-item">
+                        <label>Language:</label>
+                        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
+                            <option value="">All</option>
+                            <option value="English">English</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                        </select>
+                    </div>
+
+                    <div className="filter-item">
+                        <label>Only Show Available Books:</label>
+                        <input
+                            type="checkbox"
+                            checked={onlyAvailable}
+                            onChange={(e) => setOnlyAvailable(e.target.checked)}
+                        />
+                    </div>
                 </div>
             </header>
 
