@@ -271,7 +271,7 @@ def configure_routes(app):
         try:
             # Query to fetch all loans with details
             cursor.execute("""
-                SELECT l.loanID, l.userID, u.name as username, l.bookID, b.title as booktitle, l.borrowdate, l.duedate, l.loanstat
+                SELECT l.loanID, l.userID, u.name as username, l.bookID, b.title as booktitle, l.borrowdate, l.duedate, l.loanstat, l.returndate
                 FROM loan l
                 JOIN user u ON l.userID = u.userID
                 JOIN books b ON l.bookID = b.bookID
@@ -293,7 +293,7 @@ def configure_routes(app):
 
         # Fetch all loans for the user, including both active and returned loans
         cursor.execute("""
-        SELECT l.loanID, l.bookID, b.title, l.borrowdate, l.duedate, l.loanstat 
+        SELECT l.loanID, l.bookID, b.title, l.borrowdate, l.duedate, l.loanstat, l.returndate
         FROM loan l
         JOIN books b ON l.bookID = b.bookID
         WHERE l.userID = %s

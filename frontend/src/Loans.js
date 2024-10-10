@@ -26,12 +26,42 @@ function Loans({ user }) {
     // Function to format date into a readable format
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return isNaN(date.getTime()) ? "Invalid Date" : date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+    
+        // If the date is valid, convert it to the correct timezone
+        if (!isNaN(date.getTime())) {
+            // Format the date as UTC to avoid timezone shifts
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC'  // This ensures that it's displayed in UTC
+            });
+        }
+    
+        return "Invalid Date";
     };
+    // Function to format date and time into a readable format
+    const formatDatetime = (dateString) => {
+        const date = new Date(dateString);
+    
+        // If the date is valid, convert it to the correct timezone
+        if (!isNaN(date.getTime())) {
+            // Format the date as UTC to avoid timezone shifts
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'Asia/Singapore',  // This ensures it is displayed in GMT +8 (Singapore time)
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: true // This will format the time in 12-hour AM/PM format, remove this line for 24-hour format
+            });
+        }
+    
+        return "Invalid Date";
+    };
+    
 
     // Function to return the loaned book
     const returnBook = (loanId, bookId) => {
@@ -107,6 +137,9 @@ function Loans({ user }) {
                                 <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
                                 <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
                                 <p><strong>Status:</strong> {loan.loanstat}</p>
+                                {loan.loanstat === 'returned' && (
+                                    <p><strong>Return Date:</strong> {loan.returndate ? formatDatetime(loan.returndate) : "N/A"}</p>
+                                )}
                             </div>
                         );
                     })}
