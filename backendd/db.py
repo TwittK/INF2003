@@ -1,16 +1,9 @@
-import mysql.connector
+from pymongo import MongoClient
 
-# Database configuration
-db_config = {
-    'user': 'inf2003-sqldev',
-    'password': 'Password123!',
-    'host': '35.212.198.234',
-    'database': 'bookstore',
-    'port': 3306,
-    'raise_on_warnings': True
-}
 
-# Connect to the database
+client = MongoClient("mongodb+srv://2301864:pAssword1234@leoncluster.zzmqt.mongodb.net/", maxPoolSize = 50)
+
+# MongoDB connection
 def get_db_connection():
-    conn = mysql.connector.connect(**db_config)
-    return conn
+    db = client['database']  # Replace 'database' with your actual database name
+    return db

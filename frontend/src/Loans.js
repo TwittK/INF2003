@@ -26,42 +26,34 @@ function Loans({ user }) {
     // Function to format date into a readable format
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-    
-        // If the date is valid, convert it to the correct timezone
         if (!isNaN(date.getTime())) {
-            // Format the date as UTC to avoid timezone shifts
             return date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
-                timeZone: 'UTC'  // This ensures that it's displayed in UTC
+                timeZone: 'UTC'
             });
         }
-    
         return "Invalid Date";
     };
+
     // Function to format date and time into a readable format
     const formatDatetime = (dateString) => {
         const date = new Date(dateString);
-    
-        // If the date is valid, convert it to the correct timezone
         if (!isNaN(date.getTime())) {
-            // Format the date as UTC to avoid timezone shifts
             return date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
-                timeZone: 'Asia/Singapore',  // This ensures it is displayed in GMT +8 (Singapore time)
+                timeZone: 'Asia/Singapore',
                 hour: 'numeric',
                 minute: 'numeric',
                 second: 'numeric',
-                hour12: true // This will format the time in 12-hour AM/PM format, remove this line for 24-hour format
+                hour12: true
             });
         }
-    
         return "Invalid Date";
     };
-    
 
     // Function to return the loaned book
     const returnBook = (loanId, bookId) => {
@@ -83,7 +75,7 @@ function Loans({ user }) {
             if (data.success) {
                 alert('Book returned successfully!');
                 // Remove the returned book from current loans
-                setLoans(loans.filter(loan => loan.loanID !== loanId));
+                setLoans(loans.filter(loan => loan._id !== loanId));
             } else {
                 alert('Error returning book: ' + data.error);
             }
@@ -101,25 +93,18 @@ function Loans({ user }) {
                 <p>You have no active loans at the moment.</p>
             ) : (
                 <div className="loan-list">
-                    {loans.map((loan, index) => {
-                        console.log("Current loan object:", loan); // Check if loanID exists
-                        return (
-                            <div key={index} className="loan-card">
-                                <h3>{loan.title}</h3>
-                                <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
-                                <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
-                                <p><strong>Status:</strong> {loan.loanstat}</p>
-                                {/* Return Button */}
-                                <button onClick={() => {
-                                    console.log("Loan ID being passed:", loan.loanID);  // Ensure loan.loanID is not undefined
-                                    console.log("Book ID being passed:", loan.bookID);  // Ensure bookID is correct
-                                    returnBook(loan.loanID, loan.bookID);  // Ensure loan.loanID is passed correctly
-                                }}>
-                                    Return Book
-                                </button>
-                            </div>
-                        );
-                    })}
+                    {loans.map((loan, index) => (
+                        <div key={index} className="loan-card">
+                            <h3>{loan.title}</h3>
+                            <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
+                            <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
+                            <p><strong>Status:</strong> {loan.loanstat}</p>
+                            {/* Return Button */}
+                            <button onClick={() => returnBook(loan._id, loan.bookID)}>
+                                Return Book
+                            </button>
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -129,20 +114,17 @@ function Loans({ user }) {
                 <p>You have no loan history at the moment.</p>
             ) : (
                 <div className="loan-history-list">
-                    {loanHistory.map((loan, index) => {
-                        console.log("Loan history object:", loan);  // Check for loanID in history
-                        return (
-                            <div key={index} className="loan-card">
-                                <h3>{loan.title}</h3>
-                                <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
-                                <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
-                                <p><strong>Status:</strong> {loan.loanstat}</p>
-                                {loan.loanstat === 'returned' && (
-                                    <p><strong>Return Date:</strong> {loan.returndate ? formatDatetime(loan.returndate) : "N/A"}</p>
-                                )}
-                            </div>
-                        );
-                    })}
+                    {loanHistory.map((loan, index) => (
+                        <div key={index} className="loan-card">
+                            <h3>{loan.title}</h3>
+                            <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
+                            <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
+                            <p><strong>Status:</strong> {loan.loanstat}</p>
+                            {loan.loanstat === 'returned' && (
+                                <p><strong>Return Date:</strong> {loan.returndate ? formatDatetime(loan.returndate) : "N/A"}</p>
+                            )}
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

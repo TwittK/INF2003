@@ -29,9 +29,9 @@ function Favourites({ user }) {
                 <p>You have no favourite books yet.</p>
             ) : (
                 <ul>
-                    {favouriteBooks.map(book => (
-                        <li key={book.bookID}>
-                            {book.title} by {book.author}
+                    {favouriteBooks.map(favourite => (
+                        <li key={favourite._id}>
+                            {favourite.book?.title || 'Unknown Title'} by {favourite.book?.author || 'Unknown Author'}
                         </li>
                     ))}
                 </ul>

@@ -2,229 +2,189 @@ from flask import Flask, request, jsonify
 from db import get_db_connection
 import datetime
 
-
 def configure_routes(app):
-    # Existing routes
+    # Route for fetching books with filters
     @app.route('/books')
     def get_books():
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        # Get filter parameters from request args
+        db = get_db_connection()
+        books_collection = db['books']
+
         search_query = request.args.get('search', '')
         selected_format = request.args.get('format', '')
         selected_language = request.args.get('language', '')
         only_available = request.args.get('available', 'false')
 
-        # Build the SQL query dynamically based on the filters
-        query = """
-            SELECT * FROM books WHERE 1=1
-        """
-        params = []
-
+        query = {"$and": []}
         if search_query:
-            query += " AND (title LIKE %s OR author LIKE %s OR ISBN LIKE %s)"
-            params.extend([f"%{search_query}%", f"%{search_query}%", f"%{search_query}%"])
-
+            query["$and"].append({
+                "$or": [
+                    {"title": {"$regex": search_query, "$options": "i"}},
+                    {"author": {"$regex": search_query, "$options": "i"}},
+                    {"ISBN": {"$regex": search_query}}
+                ]
+            })
         if selected_format:
-            query += " AND format = %s"
-            params.append(selected_format)
-
+            query["$and"].append({"format": selected_format})
         if selected_language:
-            query += " AND language = %s"
-            params.append(selected_language)
-
+            query["$and"].append({"language": selected_language})
         if only_available.lower() == 'true':
-            query += " AND available > 0"
+            query["$and"].append({"available": {"$gt": 0}})
 
-        # Execute the query
-        cursor.execute(query, params)
-        books = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return jsonify(books)
+        if not query["$and"]:
+            query = {}
 
+        books = books_collection.find(query)
+        book_list = [{**book, "_id": str(book["_id"])} for book in books]
+
+        return jsonify(book_list)
+
+    # Route for fetching location data
     @app.route('/location')
     def get_location():
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM location")
-        locations = cursor.fetchall()
-        cursor.close()
-        conn.close()
+        db = get_db_connection()
+        location_collection = db['location']
+        locations = list(location_collection.find())
+        for loc in locations:
+            loc["_id"] = str(loc["_id"])
         return jsonify(locations)
 
+    # Route for fetching user data
     @app.route('/user')
     def get_users():
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM user")
-        users = cursor.fetchall()
-        cursor.close()
-        conn.close()
+        db = get_db_connection()
+        users_collection = db['user']
+        users = list(users_collection.find())
+        for user in users:
+            user["_id"] = str(user["_id"])
         return jsonify(users)
 
+    # Route for fetching loan data
     @app.route('/loan')
     def get_loans():
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM loan")
-        loans = cursor.fetchall()
-        cursor.close()
-        conn.close()
+        db = get_db_connection()
+        loans_collection = db['loan']
+        loans = list(loans_collection.find())
+        for loan in loans:
+            loan["_id"] = str(loan["_id"])
         return jsonify(loans)
 
+    # Route for fetching user's favourites
     @app.route('/favourites/<int:userID>', methods=['GET'])
     def get_favourites(userID):
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        db = get_db_connection()
+        favourites_collection = db['favourite']
+        books_collection = db['books']
 
-        # Fetch favourite books for the given userID
-        cursor.execute("""
-        SELECT b.bookID, b.title, b.author 
-        FROM favourite f
-        INNER JOIN books b ON f.bookID = b.bookID 
-        WHERE f.userID = %s
-        """, (userID,))
-    
-        favourites = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
+        favourites = list(favourites_collection.find({"userID": userID}))
+        for favourite in favourites:
+            favourite["_id"] = str(favourite["_id"])
+            book = books_collection.find_one({"bookID": favourite['bookID']})
+            if book:
+                favourite['book'] = {**book, "_id": str(book["_id"])}
         return jsonify(favourites)
 
-    # New route for registering a user
+    # Route for registering a new user
     @app.route('/register', methods=['POST'])
     def register_user():
         data = request.get_json()
         name = data.get('name')
         email = data.get('email')
         password = data.get('password')
-        userprivilege = data.get('userprivilege', 'USER')  # Default to 'USER' if not provided
+        userprivilege = data.get('userprivilege', 'USER')
 
         if userprivilege not in ['USER', 'ADMIN']:
             return jsonify({"success": False, "error": "Invalid user privilege"}), 400
-    
-        if not name or not email or not password:
-            return jsonify({"success": False, "error": "Missing data"}), 400
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        db = get_db_connection()
+        users_collection = db['user']
 
         try:
-            # Insert the new user into the 'user' table
-            cursor.execute("INSERT INTO user (name, email, password, userprivilege) VALUES (%s, %s, %s, %s)", 
-                       (name, email, password, userprivilege))            
-            conn.commit()
-            cursor.close()
-            conn.close()
+            users_collection.insert_one({
+                "name": name,
+                "email": email,
+                "password": password,
+                "userprivilege": userprivilege
+            })
             return jsonify({"success": True, "message": "User registered successfully"}), 201
         except Exception as e:
-            conn.rollback()
-            cursor.close()
-            conn.close()
             return jsonify({"success": False, "error": str(e)}), 500
+
+    # Route for adding a book to favourites
     @app.route('/favourite', methods=['POST'])
     def add_to_favourite():
         data = request.get_json()
         user_id = data.get('user_id')
         book_id = data.get('book_id')
 
-        if not user_id or not book_id:
-            return jsonify({"success": False, "error": "Missing user_id or book_id"}), 400
+        db = get_db_connection()
+        favourites_collection = db['favourite']
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Add to the 'favourite' table
-        cursor.execute("INSERT INTO favourite (userID, bookID) VALUES (%s, %s)", (user_id, book_id))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-
+        favourites_collection.insert_one({
+            "userID": user_id,
+            "bookID": book_id
+        })
         return jsonify({"success": True, "message": "Book added to favourites!"}), 201
-    # New route for user login
+
+    # Route for user login
     @app.route('/login', methods=['POST'])
     def login_user():
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
 
-        if not email or not password:
-            return jsonify({"success": False, "error": "Missing email or password"}), 400
-
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        # Fetch user based on the email and password
-        cursor.execute("SELECT * FROM user WHERE email = %s AND password = %s", (email, password))
-        user = cursor.fetchone()
+        db = get_db_connection()
+        users_collection = db['user']
+        user = users_collection.find_one({"email": email, "password": password})
         
-        cursor.close()
-        conn.close()
-
         if user:
+            user["_id"] = str(user["_id"])
             return jsonify({"success": True, "message": "Login successful", "user": user}), 200
         else:
             return jsonify({"success": False, "error": "Invalid credentials"}), 401
-        
+
+    # Route for loaning a book
     @app.route('/loan', methods=['POST'])
     def loan_book():
         data = request.get_json()
         user_id = data.get('user_id')
         book_id = data.get('book_id')
 
-        if not user_id or not book_id:
-            return jsonify({"success": False, "error": "Missing user_id or book_id"}), 400
+        db = get_db_connection()
+        loans_collection = db['loan']
+        books_collection = db['books']
 
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        borrow_date = datetime.datetime.now()
+        due_date = borrow_date + datetime.timedelta(days=30)
 
         try:
-            # Set borrowdate to current date and duedate to one month from now
-            # Set borrowdate to current date and duedate to one month from now
-            borrow_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            due_date = (datetime.datetime.now() + datetime.timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
-
-            # Insert loan record into the 'loan' table (without locID)
-            cursor.execute("""
-                INSERT INTO loan (userID, bookID, loanstat, borrowdate, duedate) 
-                VALUES (%s, %s, 'on loan', %s, %s)
-                """, (user_id, book_id, borrow_date, due_date))
-
-            # Update the books table to reduce the available quantity
-            cursor.execute("UPDATE books SET available = available - 1 WHERE bookID = %s", (book_id,))
-        
-            conn.commit()
+            loans_collection.insert_one({
+                "userID": user_id,
+                "bookID": book_id,
+                "loanstat": "on loan",
+                "borrowdate": borrow_date,
+                "duedate": due_date
+            })
+            books_collection.update_one({"bookID": book_id}, {"$inc": {"available": -1}})
             return jsonify({"success": True, "message": "Book loaned successfully!"}), 201
         except Exception as e:
-            conn.rollback()
             return jsonify({"success": False, "error": str(e)}), 500
-        finally:
-            cursor.close()
-            conn.close()
 
+    # Route for fetching user's active loans
     @app.route('/loans/<int:user_id>', methods=['GET'])
     def get_user_loans(user_id):
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        db = get_db_connection()
+        loans_collection = db['loan']
+        books_collection = db['books']
 
-        # Fetch loan details along with the book title and loanID
-        cursor.execute("""
-        SELECT l.loanID, l.bookID, l.userID, l.borrowdate, l.duedate, l.loanstat, b.title
-        FROM loan l
-        JOIN books b ON l.bookID = b.bookID
-        WHERE l.userID = %s AND l.loanstat = 'on loan'
-        """, (user_id,))
-        
-        loans = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
+        loans = list(loans_collection.find({"userID": user_id, "loanstat": "on loan"}))
+        for loan in loans:
+            loan["_id"] = str(loan["_id"])
+            book = books_collection.find_one({"bookID": loan['bookID']})
+            if book:
+                loan['title'] = book['title']
         return jsonify(loans)
 
-    
-    # Route to return a loaned book
+    # Route for returning a loaned book
     @app.route('/return', methods=['POST'])
     def return_book():
         data = request.get_json()
@@ -232,79 +192,50 @@ def configure_routes(app):
         book_id = data.get('book_id')
         user_id = data.get('user_id')
 
-        if not loan_id or not book_id or not user_id:
-            return jsonify({"success": False, "error": "Missing loan_id, book_id, or user_id"}), 400
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        db = get_db_connection()
+        loans_collection = db['loan']
+        books_collection = db['books']
 
         try:
-            # Update loan status to 'returned'
-            cursor.execute("""
-                UPDATE loan 
-                SET loanstat = 'returned' 
-                WHERE loanID = %s AND bookID = %s AND userID = %s
-            """, (loan_id, book_id, user_id))
-
-            # Increment the available count of the book
-            cursor.execute("""
-                UPDATE books 
-                SET available = available + 1 
-                WHERE bookID = %s
-            """, (book_id,))
-
-            conn.commit()
+            loans_collection.update_one(
+                {"loanID": loan_id, "bookID": book_id, "userID": user_id},
+                {"$set": {"loanstat": "returned"}}
+            )
+            books_collection.update_one({"bookID": book_id}, {"$inc": {"available": 1}})
             return jsonify({"success": True, "message": "Book returned successfully!"}), 200
         except Exception as e:
-            conn.rollback()
             return jsonify({"success": False, "error": str(e)}), 500
-        finally:
-            cursor.close()
-            conn.close()
 
-
+    # Route for fetching all loans for admin view
     @app.route('/admin/loans', methods=['GET'])
     def get_all_loans():
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        db = get_db_connection()
+        loans_collection = db['loan']
+        users_collection = db['user']
+        books_collection = db['books']
 
-        try:
-            # Query to fetch all loans with details
-            cursor.execute("""
-                SELECT l.loanID, l.userID, u.name as username, l.bookID, b.title as booktitle, l.borrowdate, l.duedate, l.loanstat, l.returndate
-                FROM loan l
-                JOIN user u ON l.userID = u.userID
-                JOIN books b ON l.bookID = b.bookID
-                ORDER BY l.borrowdate DESC
-            """)
-            
-            loans = cursor.fetchall()
-            return jsonify(loans), 200
-        except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
-        finally:
-            cursor.close()
-            conn.close()
+        loans = list(loans_collection.find())
+        for loan in loans:
+            loan["_id"] = str(loan["_id"])
+            user = users_collection.find_one({"userID": loan['userID']})
+            book = books_collection.find_one({"bookID": loan['bookID']})
+            if user:
+                loan['username'] = user['name']
+            if book:
+                loan['booktitle'] = book['title']
+        return jsonify(loans), 200
 
+    # Route for fetching loan history for a user
     @app.route('/loan_history/<int:user_id>', methods=['GET'])
     def loan_history(user_id):
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        db = get_db_connection()
+        loans_collection = db['loan']
+        books_collection = db['books']
 
-        # Fetch all loans for the user, including both active and returned loans
-        cursor.execute("""
-        SELECT l.loanID, l.bookID, b.title, l.borrowdate, l.duedate, l.loanstat, l.returndate
-        FROM loan l
-        JOIN books b ON l.bookID = b.bookID
-        WHERE l.userID = %s
-        ORDER BY l.borrowdate DESC
-        """, (user_id,))
-        
-        loans = cursor.fetchall()
-        cursor.close()
-        conn.close()
-
+        loans = list(loans_collection.find({"userID": user_id}))
+        for loan in loans:
+            loan["_id"] = str(loan["_id"])
+            book = books_collection.find_one({"bookID": loan['bookID']})
+            if book:
+                loan['title'] = book['title']
         return jsonify(loans)
-
-
-

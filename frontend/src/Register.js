@@ -5,7 +5,7 @@ function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const navigate = useNavigate();  // Hook for navigation
+    const navigate = useNavigate();
 
     const handleRegister = (e) => {
         e.preventDefault();
@@ -15,18 +15,24 @@ function Register() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name, email, password }),
+            body: JSON.stringify({ name, email, password, userprivilege: 'USER' }), // Set userprivilege directly
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 alert('Registration successful, please login.');
-                navigate('/login');  // Redirect to login page after successful registration
+                navigate('/login');  // Redirect to login page
             } else {
                 alert('Registration failed: ' + data.error);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error during registration:', error);
+            alert('An error occurred. Please try again.');
+        });
     };
 
     return (

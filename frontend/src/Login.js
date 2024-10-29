@@ -16,16 +16,22 @@ function Login({ setUser }) {
             },
             body: JSON.stringify({ email, password }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                setUser(data.user);  // Store user info (e.g., privilege) in state
+                setUser({ ...data.user, userID: data.user._id });  // Ensure user ID consistency
                 navigate('/');  // Redirect to home page
             } else {
                 alert('Login failed: ' + data.error);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error during login:', error);
+            alert('An error occurred. Please try again.');
+        });
     };
 
     return (
