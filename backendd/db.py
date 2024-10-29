@@ -7,3 +7,6 @@ client = MongoClient("mongodb+srv://2301864:pAssword1234@leoncluster.zzmqt.mongo
 def get_db_connection():
     db = client['database']  # Replace 'database' with your actual database name
     return db
+
+print("Connecting to MongoDB URI:", client)
+

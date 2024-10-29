@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from db import get_db_connection
 import datetime
+from bson import ObjectId  # Import ObjectId to handle MongoDB IDs
+
 
 def configure_routes(app):
     # Route for fetching books with filters
@@ -69,19 +71,25 @@ def configure_routes(app):
         return jsonify(loans)
 
     # Route for fetching user's favourites
-    @app.route('/favourites/<int:userID>', methods=['GET'])
-    def get_favourites(userID):
+    @app.route('/favourites/<int:user_id>', methods=['GET'])
+    def get_favourites(user_id):  # No ObjectId conversion needed
         db = get_db_connection()
         favourites_collection = db['favourite']
         books_collection = db['books']
 
-        favourites = list(favourites_collection.find({"userID": userID}))
+        # Query by the integer `userID` field directly
+        favourites = list(favourites_collection.find({"userID": user_id}))
+
+        # Attach book details to each favourite entry
         for favourite in favourites:
             favourite["_id"] = str(favourite["_id"])
             book = books_collection.find_one({"bookID": favourite['bookID']})
             if book:
                 favourite['book'] = {**book, "_id": str(book["_id"])}
+
         return jsonify(favourites)
+
+
 
     # Route for registering a new user
     @app.route('/register', methods=['POST'])
