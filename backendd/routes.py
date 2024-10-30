@@ -16,27 +16,29 @@ def configure_routes(app):
         selected_format = request.args.get('format', '')
         selected_language = request.args.get('language', '')
         only_available = request.args.get('available', 'false')
+        
+        # Pagination parameters
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 10))
+        skip = (page - 1) * limit
 
-        query = {"$and": []}
+        query = {}
+
+        # Use the indexed fields to build query conditions
         if search_query:
-            query["$and"].append({
-                "$or": [
-                    {"title": {"$regex": search_query, "$options": "i"}},
-                    {"author": {"$regex": search_query, "$options": "i"}},
-                    {"ISBN": {"$regex": search_query}}
-                ]
-            })
+            query["$or"] = [
+                {"title": {"$regex": search_query, "$options": "i"}},
+                {"author": {"$regex": search_query, "$options": "i"}},
+                {"ISBN": {"$regex": search_query}}
+            ]
         if selected_format:
-            query["$and"].append({"format": selected_format})
+            query["format"] = selected_format
         if selected_language:
-            query["$and"].append({"language": selected_language})
+            query["language"] = selected_language
         if only_available.lower() == 'true':
-            query["$and"].append({"available": {"$gt": 0}})
+            query["available"] = {"$gt": 0}
 
-        if not query["$and"]:
-            query = {}
-
-        books = books_collection.find(query)
+        books = books_collection.find(query).skip(skip).limit(limit)
         book_list = [{**book, "_id": str(book["_id"])} for book in books]
 
         return jsonify(book_list)

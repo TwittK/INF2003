@@ -10,19 +10,19 @@ function Books({ user }) {
     const [onlyAvailable, setOnlyAvailable] = useState(false);
     const booksPerPage = 10;
 
-    // Fetch books from backend
+    // Fetch books from backend with pagination
     useEffect(() => {
         const fetchBooks = async () => {
             try {
-                // Build query parameters
                 const queryParams = new URLSearchParams({
                     search: searchQuery || '',
                     format: selectedFormat || '',
                     language: selectedLanguage || '',
-                    available: onlyAvailable ? 'true' : 'false'
+                    available: onlyAvailable ? 'true' : 'false',
+                    page: currentPage,
+                    limit: booksPerPage,
                 });
 
-                // Fetch data from Flask backend
                 const response = await fetch(`http://localhost:5000/books?${queryParams.toString()}`);
                 const data = await response.json();
                 setBooks(data);  // Set fetched books data
@@ -32,7 +32,7 @@ function Books({ user }) {
         };
 
         fetchBooks();
-    }, [searchQuery, selectedFormat, selectedLanguage, onlyAvailable]);
+    }, [searchQuery, selectedFormat, selectedLanguage, onlyAvailable, currentPage]);
 
     useEffect(() => {
         fetch('http://localhost:5000/books')
