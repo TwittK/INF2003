@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask import current_app
 from db import get_db_connection
 import datetime
 from bson import ObjectId  # Import ObjectId to handle MongoDB IDs
@@ -91,7 +92,6 @@ def configure_routes(app):
 
 
 
-    # Route for registering a new user
     @app.route('/register', methods=['POST'])
     def register_user():
         data = request.get_json()
@@ -106,8 +106,13 @@ def configure_routes(app):
         db = get_db_connection()
         users_collection = db['user']
 
+        # Find the highest existing userID and increment it for the new user
+        last_user = users_collection.find_one(sort=[("userID", -1)])  # Sort by userID in descending order
+        new_user_id = last_user["userID"] + 1 if last_user and "userID" in last_user else 1
+
         try:
             users_collection.insert_one({
+                "userID": new_user_id,  # Custom userID
                 "name": name,
                 "email": email,
                 "password": password,
@@ -150,7 +155,6 @@ def configure_routes(app):
         else:
             return jsonify({"success": False, "error": "Invalid credentials"}), 401
 
-    # Route for loaning a book
     @app.route('/loan', methods=['POST'])
     def loan_book():
         data = request.get_json()
@@ -164,8 +168,14 @@ def configure_routes(app):
         borrow_date = datetime.datetime.now()
         due_date = borrow_date + datetime.timedelta(days=30)
 
+        # Find the highest existing loanID and increment it
+        last_loan = loans_collection.find_one(sort=[("loanID", -1)])
+        new_loan_id = last_loan["loanID"] + 1 if last_loan and "loanID" in last_loan else 1
+
         try:
+            # Insert loan with custom loanID
             loans_collection.insert_one({
+                "loanID": new_loan_id,
                 "userID": user_id,
                 "bookID": book_id,
                 "loanstat": "on loan",
@@ -192,11 +202,10 @@ def configure_routes(app):
                 loan['title'] = book['title']
         return jsonify(loans)
 
-    # Route for returning a loaned book
     @app.route('/return', methods=['POST'])
     def return_book():
         data = request.get_json()
-        loan_id = data.get('loan_id')
+        loan_id = data.get('loan_id')  # Custom loanID field
         book_id = data.get('book_id')
         user_id = data.get('user_id')
 
@@ -205,12 +214,23 @@ def configure_routes(app):
         books_collection = db['books']
 
         try:
-            loans_collection.update_one(
+            # Update loan status to "returned" using custom loanID
+            result = loans_collection.update_one(
                 {"loanID": loan_id, "bookID": book_id, "userID": user_id},
-                {"$set": {"loanstat": "returned"}}
+                {"$set": {"loanstat": "returned", "returndate": datetime.datetime.now()}}
             )
+
+            # Check if the document was found and modified
+            if result.matched_count == 0:
+                return jsonify({"success": False, "error": "No matching loan found"}), 404
+            if result.modified_count == 0:
+                return jsonify({"success": False, "error": "Loan status not updated"}), 500
+
+            # Increment book availability by 1
             books_collection.update_one({"bookID": book_id}, {"$inc": {"available": 1}})
+            
             return jsonify({"success": True, "message": "Book returned successfully!"}), 200
+
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
 
@@ -233,17 +253,22 @@ def configure_routes(app):
                 loan['booktitle'] = book['title']
         return jsonify(loans), 200
 
-    # Route for fetching loan history for a user
     @app.route('/loan_history/<int:user_id>', methods=['GET'])
     def loan_history(user_id):
         db = get_db_connection()
         loans_collection = db['loan']
         books_collection = db['books']
 
+        # Fetch all loans associated with the user, regardless of status
         loans = list(loans_collection.find({"userID": user_id}))
+        
         for loan in loans:
             loan["_id"] = str(loan["_id"])
             book = books_collection.find_one({"bookID": loan['bookID']})
             if book:
                 loan['title'] = book['title']
+            # Optionally include the return date if available
+            if loan['loanstat'] == 'returned':
+                loan['returndate'] = loan.get('returndate', "N/A")
+
         return jsonify(loans)

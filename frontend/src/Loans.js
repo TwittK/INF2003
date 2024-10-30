@@ -4,8 +4,8 @@ function Loans({ user }) {
     const [loans, setLoans] = useState([]);
     const [loanHistory, setLoanHistory] = useState([]);
 
-    // Fetch both current loans and loan history for the logged-in user
-    useEffect(() => {
+    // Define fetchLoanData function to get loan data from the server
+    const fetchLoanData = () => {
         if (user && user.userID) {
             fetch(`http://localhost:5000/loan_history/${user.userID}`)
                 .then(response => response.json())
@@ -21,6 +21,11 @@ function Loans({ user }) {
                 })
                 .catch(error => console.error('Error fetching loan data:', error));
         }
+    };
+
+    // Call fetchLoanData in useEffect for initial load
+    useEffect(() => {
+        fetchLoanData();
     }, [user]);
 
     // Function to format date into a readable format
@@ -57,8 +62,6 @@ function Loans({ user }) {
 
     // Function to return the loaned book
     const returnBook = (loanId, bookId) => {
-        console.log("Returning book with the following details:", { loanId, bookId, userID: user.userID });
-
         fetch(`http://localhost:5000/return`, {
             method: 'POST',
             headers: {
@@ -74,14 +77,15 @@ function Loans({ user }) {
         .then(data => {
             if (data.success) {
                 alert('Book returned successfully!');
-                // Remove the returned book from current loans
-                setLoans(loans.filter(loan => loan._id !== loanId));
+                // Re-fetch loan data to update the UI
+                fetchLoanData();
             } else {
                 alert('Error returning book: ' + data.error);
             }
         })
         .catch(error => console.error('Error returning book:', error));
     };
+    
 
     return (
         <div>
@@ -100,7 +104,7 @@ function Loans({ user }) {
                             <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
                             <p><strong>Status:</strong> {loan.loanstat}</p>
                             {/* Return Button */}
-                            <button onClick={() => returnBook(loan._id, loan.bookID)}>
+                            <button onClick={() => returnBook(loan.loanID, loan.bookID)}>
                                 Return Book
                             </button>
                         </div>
