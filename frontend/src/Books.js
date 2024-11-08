@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './App.css';
 
 function Books({ user }) {
@@ -10,8 +9,6 @@ function Books({ user }) {
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [onlyAvailable, setOnlyAvailable] = useState(false);
     const booksPerPage = 10;
-
-    const navigate = useNavigate();
 
     // Fetch books from backend with pagination
     useEffect(() => {
@@ -114,11 +111,6 @@ function Books({ user }) {
         .catch(error => console.error('Error:', error));
     };
 
-    // Navigate to the BookReviews page
-    const viewReviews = (bookId) => {
-        navigate(`/reviews/${bookId}`);
-    };
-
     // Pagination logic: Calculate the books to display based on the current page
     const indexOfLastBook = currentPage * booksPerPage;
     const indexOfFirstBook = indexOfLastBook - booksPerPage;
@@ -130,48 +122,57 @@ function Books({ user }) {
     return (
         <div>
             <header className="App-header">
-                <h1>Bookstore</h1>
-                <div className="header-content">
-                    Enjoy exploring our vast collection of books!
-                </div>
-                <div className="search-bar-center">
-                    <input
-                        type="text"
-                        placeholder="Search by Title, Author, or ISBN"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                {/* Filter UI */}
-                <div className="filters">
-                    <div className="filter-item">
-                        <label>Format:</label>
-                        <select value={selectedFormat} onChange={(e) => setSelectedFormat(e.target.value)}>
-                            <option value="">All</option>
-                            <option value="Paperback">Paperback</option>
-                            <option value="Hardcover">Hardcover</option>
-                            <option value="eBook">eBook</option>
-                        </select>
+                <div className="text-section">
+                    <h1>Bookstore</h1>
+                    <div className="header-content">
+                        Enjoy exploring our vast collection of books!
                     </div>
-
-                    <div className="filter-item">
-                        <label>Language:</label>
-                        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
-                            <option value="">All</option>
-                            <option value="English">English</option>
-                            <option value="Spanish">Spanish</option>
-                            <option value="French">French</option>
-                        </select>
-                    </div>
-
-                    <div className="filter-item">
-                        <label>Only Show Available Books:</label>
+                    <div className="search-bar-center">
                         <input
-                            type="checkbox"
-                            checked={onlyAvailable}
-                            onChange={(e) => setOnlyAvailable(e.target.checked)}
+                            type="text"
+                            placeholder="Search by Title, Author, or ISBN"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
+                    {/* Filter UI */}
+                    <div className="filters">
+                        <div className="filter-row">
+                            <div className="filter-item">
+                                <label>Format:</label>
+                                <select value={selectedFormat} onChange={(e) => setSelectedFormat(e.target.value)}>
+                                    <option value="">All</option>
+                                    <option value="Paperback">Paperback</option>
+                                    <option value="Hardcover">Hardcover</option>
+                                    <option value="eBook">eBook</option>
+                                </select>
+                            </div>
+
+                            <div className="filter-item">
+                                <label>Language:</label>
+                                <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
+                                    <option value="">All</option>
+                                    <option value="English">English</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="French">French</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="filter-row">
+                            <div className="filter-checkbox">
+                                <label>Only Show Available Books:</label>
+                                <input
+                                    type="checkbox"
+                                    checked={onlyAvailable}
+                                    onChange={(e) => setOnlyAvailable(e.target.checked)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="image-section">
+                    <img src="book.jpg" alt="Books" className="banner-image" />
                 </div>
             </header>
 
@@ -227,10 +228,6 @@ function Books({ user }) {
                             disabled={item.available <= 0}
                         >
                             Loan Book
-                        </button>
-                        {/* View Reviews Button */}
-                        <button onClick={() => viewReviews(item.bookID)}>
-                            View Reviews
                         </button>
                     </div>
                 ))}

@@ -7,19 +7,41 @@
 } 
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: #efe3d6;
+  min-height: 80vh;
   display: flex;
-  flex-direction: column;
-  padding: 20px;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: black;
 }
 
+.text-section {
+  flex: 1; /* Takes up 50% of the width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.image-section {
+  flex: 1; /* Takes up 50% of the width */
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
 .header-content {
-    font-size: 1em;
+    font-size: 0.8em;
     margin-bottom: 20px;
     opacity: 0.75;
 }
@@ -33,21 +55,17 @@
   min-height: 60vh;
 }
 
-.sidebar {
-  width: 20%;  /* Make the sidebar smaller */
-  background-color: #f5f5f5;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
 .filters {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 20px;  /* Reduced gap for neater look */
-  margin-top: 10px;
+  margin-top: 8px;
+}
+
+.filter-row {
+  display: flex;
 }
 
 .filter-item {
@@ -55,8 +73,17 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  font-size: 25px;  /* Adjust font size for labels */
-  margin-right: 10px;
+  font-size: 15px;  /* Adjust font size for labels */
+  margin-right: 2px;
+}
+
+.filter-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;  /* Adjust font size for labels */
+  margin-right: 2px;
 }
 
 .filter-item label {
@@ -66,7 +93,7 @@
   font-size: 1.2rem;
 }
 
-.filter-item select, .filter-item input[type="checkbox"] {
+.filter-checkbox select, .filter-item input[type="checkbox"] {
   padding: 5px;
   font-size: 0.7em;
   width: auto;
@@ -96,7 +123,7 @@
 .search-bar-center input {
   width: 60%; /* Makes the input wider */
   padding: 10px;
-  font-size: 1em;
+  font-size: 0.8em;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
@@ -107,13 +134,13 @@
 
 .navbar {
     width: 100%;
-    background-color: #333; /* Dark background for the navbar */
-    color: white;
+    background-color: #efe3d6;
+    color: black;
     padding: 0.5rem 1rem; /* Reduced padding */
     display: flex;
     justify-content: space-between; /* Adjust this based on your nav content */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Optional: adds depth */
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid black;
 }
 
 .navbar ul {
@@ -135,13 +162,13 @@
     margin-right: 20px;
     padding: 5px 10px; 
     text-decoration: none;
-    color: white;
+    color: black;
 }
 
 .auth-links a {
     padding: 5px 10px; 
     text-decoration: none;
-    color: white;
+    color: black;
     margin-right: 0; /* No right margin on the last element */
 }
 
