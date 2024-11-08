@@ -8,6 +8,7 @@ import Login from './Login';
 import Register from './Register'; 
 import AdminLoans from './AdminLoans';
 import Loans from './Loans';   
+import BookReviews from './bookreviews';
 import './App.css';
 
 function App() {
@@ -40,6 +41,9 @@ function App() {
 
                     {/* Register route */}
                     <Route path="/register" element={<Register />} />
+
+                    {/* BookReviews route */}
+                    <Route path="/reviews/:bookId" element={<BookReviews />} />
 
                     {/* Admin route: Accessible only to admins */}
                     <Route path="/admin/loans" element={user && user.userprivilege === 'ADMIN' ? <AdminLoans user={user} /> : <Navigate to="/login" />} />

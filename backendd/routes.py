@@ -274,3 +274,73 @@ def configure_routes(app):
                 loan['returndate'] = loan.get('returndate', "N/A")
 
         return jsonify(loans)
+    
+
+
+    @app.route('/add_review', methods=['POST'])
+    def add_review():
+        data = request.get_json()
+        user_id = data.get('user_id')
+        book_id = data.get('book_id')
+        review_text = data.get('review_text')
+        rating = data.get('rating')
+
+        db = get_db_connection()
+        reviews_collection = db['reviews']
+        loans_collection = db['loan']
+
+        # Check if the user has returned this book
+        loan = loans_collection.find_one({
+            "userID": user_id,
+            "bookID": book_id,
+            "loanstat": "returned"
+        })
+
+        if not loan:
+            return jsonify({"success": False, "error": "You can only review books you have returned"}), 400
+
+        try:
+            # Insert the new review
+            reviews_collection.insert_one({
+                "bookID": book_id,
+                "userID": user_id,
+                "reviewText": review_text,
+                "rating": rating,
+                "reviewDate": datetime.datetime.now()
+            })
+            return jsonify({"success": True, "message": "Review added successfully"}), 201
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
+
+    @app.route('/reviews/<int:book_id>', methods=['GET'])
+    def get_reviews(book_id):
+        db = get_db_connection()
+        reviews_collection = db['reviews']
+        users_collection = db['user']
+
+        # Find all reviews for the specified book
+        reviews = list(reviews_collection.find({"bookID": book_id}))
+        
+        # Include reviewer name in each review
+        for review in reviews:
+            review["_id"] = str(review["_id"])
+            user = users_collection.find_one({"userID": review["userID"]})
+            if user:
+                review["username"] = user["name"]
+
+        return jsonify(reviews)
+    
+    # Route to fetch details of a single book by bookID
+    @app.route('/books/<int:book_id>', methods=['GET'])
+    def get_book_details(book_id):
+        db = get_db_connection()
+        books_collection = db['books']
+
+        book = books_collection.find_one({"bookID": book_id})
+        if book:
+            book["_id"] = str(book["_id"])
+            return jsonify(book)
+        else:
+            return jsonify({"error": "Book not found"}), 404
+

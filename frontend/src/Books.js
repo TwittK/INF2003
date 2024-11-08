@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 
 function Books({ user }) {
@@ -9,6 +10,8 @@ function Books({ user }) {
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [onlyAvailable, setOnlyAvailable] = useState(false);
     const booksPerPage = 10;
+
+    const navigate = useNavigate();
 
     // Fetch books from backend with pagination
     useEffect(() => {
@@ -109,6 +112,11 @@ function Books({ user }) {
             }
         })
         .catch(error => console.error('Error:', error));
+    };
+
+    // Navigate to the BookReviews page
+    const viewReviews = (bookId) => {
+        navigate(`/reviews/${bookId}`);
     };
 
     // Pagination logic: Calculate the books to display based on the current page
@@ -219,6 +227,10 @@ function Books({ user }) {
                             disabled={item.available <= 0}
                         >
                             Loan Book
+                        </button>
+                        {/* View Reviews Button */}
+                        <button onClick={() => viewReviews(item.bookID)}>
+                            View Reviews
                         </button>
                     </div>
                 ))}
