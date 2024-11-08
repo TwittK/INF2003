@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 
 function Books({ user }) {
@@ -9,6 +10,7 @@ function Books({ user }) {
     const [selectedLanguage, setSelectedLanguage] = useState("");
     const [onlyAvailable, setOnlyAvailable] = useState(false);
     const booksPerPage = 10;
+    const navigate = useNavigate();
 
     // Fetch books from backend with pagination
     useEffect(() => {
@@ -33,6 +35,11 @@ function Books({ user }) {
 
         fetchBooks();
     }, [searchQuery, selectedFormat, selectedLanguage, onlyAvailable, currentPage]);
+
+    // Navigate to the BookReviews page
+    const viewReviews = (bookId) => {
+        navigate(`/reviews/${bookId}`);
+    };
 
     useEffect(() => {
         fetch('http://localhost:5000/books')
@@ -228,6 +235,13 @@ function Books({ user }) {
                             disabled={item.available <= 0}
                         >
                             Loan Book
+                        </button>
+                        {/* Loan Button */}
+                        <button 
+                            onClick={() => viewReviews(item.bookID)} 
+                            disabled={item.available <= 0}
+                        >
+                            View Reviews
                         </button>
                     </div>
                 ))}
