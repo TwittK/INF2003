@@ -354,4 +354,24 @@ def configure_routes(app):
             return jsonify(book)
         else:
             return jsonify({"error": "Book not found"}), 404
+        
+    @app.route('/favourite/remove', methods=['DELETE'])
+    def remove_favourite():
+        data = request.get_json()
+        user_id = data.get('user_id')
+        book_id = data.get('book_id')
+
+        db = get_db_connection()
+        favourites_collection = db['favourite']
+
+        result = favourites_collection.delete_one({
+            "userID": user_id,
+            "bookID": book_id
+        })
+
+        if result.deleted_count > 0:
+            return jsonify({"success": True, "message": "Book removed from favourites!"}), 200
+        else:
+            return jsonify({"success": False, "error": "Favourite not found"}), 404
+
 
