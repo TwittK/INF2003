@@ -289,14 +289,22 @@ def configure_routes(app):
         reviews_collection = db['reviews']
         loans_collection = db['loan']
 
-        # Check if the user has returned this book
+        # Debugging output
+        print(f"Received data: user_id={user_id}, book_id={book_id}")
+
+        # Attempt to find the loan
         loan = loans_collection.find_one({
             "userID": user_id,
-            "bookID": book_id,
-            "loanstat": "returned"
+            "bookID": book_id
         })
 
+        # Print loan record for debugging
+        print("Loan record found:", loan)
+
         if not loan:
+            return jsonify({"success": False, "error": "Loan record not found."}), 400
+
+        if loan.get("loanstat") != "returned":
             return jsonify({"success": False, "error": "You can only review books you have returned"}), 400
 
         try:
@@ -311,6 +319,9 @@ def configure_routes(app):
             return jsonify({"success": True, "message": "Review added successfully"}), 201
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
+
+
+
 
 
     @app.route('/reviews/<int:book_id>', methods=['GET'])

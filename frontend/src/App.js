@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// App.js
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Books from './Books'; 
@@ -12,11 +13,25 @@ import BookReviews from './bookreviews';
 import './App.css';
 
 function App() {
-    const [user, setUser] = useState(null);  // State to track the logged-in user
+    // Initialize user from localStorage, or null if not found
+    const [user, setUser] = useState(() => {
+        const storedUser = localStorage.getItem('user');
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
+
+    // Sync user state with localStorage
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('user');
+        }
+    }, [user]);
 
     // Logout function to clear the user state
     const handleLogout = () => {
         setUser(null);
+        localStorage.removeItem('user'); // Also remove from localStorage
     };
 
     return (
@@ -42,8 +57,8 @@ function App() {
                     {/* Register route */}
                     <Route path="/register" element={<Register />} />
 
-                    {/* BookReviews route */}
-                    <Route path="/reviews/:bookId" element={<BookReviews />} />
+                    {/* BookReviews route: Pass user to BookReviews */}
+                    <Route path="/reviews/:bookId" element={<BookReviews user={user} />} />
 
                     {/* Admin route: Accessible only to admins */}
                     <Route path="/admin/loans" element={user && user.userprivilege === 'ADMIN' ? <AdminLoans user={user} /> : <Navigate to="/login" />} />

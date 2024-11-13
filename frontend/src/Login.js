@@ -1,4 +1,4 @@
-// login.js
+// Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,9 +23,8 @@ function Login({ setUser }) {
         })
         .then(data => {
             if (data.success) {
-                // Only set numeric userID for simplicity
                 const user = { ...data.user, userID: data.user.userID || data.user._id };
-                setUser(user);  // Update user with a consistent userID field
+                setUser(user);  // Update user state and localStorage
                 navigate('/');  // Redirect to home page
             } else {
                 alert('Login failed: ' + data.error);
