@@ -16,11 +16,7 @@ def configure_routes(app):
         selected_format = request.args.get('format', '')
         selected_language = request.args.get('language', '')
         only_available = request.args.get('available', 'false')
-        
-        # Pagination parameters
-        page = int(request.args.get('page', 1))
-        limit = int(request.args.get('limit', 10))
-        skip = (page - 1) * limit
+
 
         query = {}
 
@@ -38,7 +34,7 @@ def configure_routes(app):
         if only_available.lower() == 'true':
             query["available"] = {"$gt": 0}
 
-        books = books_collection.find(query).skip(skip).limit(limit)
+        books = books_collection.find(query)
         book_list = [{**book, "_id": str(book["_id"])} for book in books]
 
         return jsonify(book_list)
