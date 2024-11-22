@@ -10,6 +10,7 @@ import Register from './Register';
 import AdminLoans from './AdminLoans';
 import Loans from './Loans';   
 import BookReviews from './bookreviews';
+import MostBorrowed from './mostborrowed';
 import './App.css';
 
 function App() {
@@ -60,8 +61,10 @@ function App() {
                     {/* BookReviews route: Pass user to BookReviews */}
                     <Route path="/reviews/:bookId" element={<BookReviews user={user} />} />
 
-                    {/* Admin route: Accessible only to admins */}
+                    {/* ALl loans route: Accessible only to admins */}
                     <Route path="/admin/loans" element={user && user.userprivilege === 'ADMIN' ? <AdminLoans user={user} /> : <Navigate to="/login" />} />
+                    {/* Most borrowed books route: Accessible only to admins */}
+                    <Route path="/admin/most_borrowed" element={user && user.userprivilege === 'ADMIN' ? <MostBorrowed user={user} /> : <Navigate to="/login" />} />
                 </Routes>
             </div>
         </Router>

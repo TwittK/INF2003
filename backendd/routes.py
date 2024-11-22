@@ -369,5 +369,39 @@ def configure_routes(app):
             return jsonify({"success": True, "message": "Book removed from favourites!"}), 200
         else:
             return jsonify({"success": False, "error": "Favourite not found"}), 404
+        
+        # Route for fetching the most borrowed books
+    @app.route('/admin/most_borrowed', methods=['GET'])
+    def get_most_borrowed_books():
+        db = get_db_connection()
+        loans_collection = db['loan']
+        books_collection = db['books']
+
+        # Aggregate the most borrowed books
+        pipeline = [
+            {"$group": {"_id": "$bookID", "borrow_count": {"$sum": 1}}},
+            {"$sort": {"borrow_count": -1}},  # Sort by borrow count descending
+            {"$limit": 10},  # Get the top 10
+            {"$lookup": {
+                "from": "books",
+                "localField": "_id",
+                "foreignField": "bookID",
+                "as": "book_info"
+            }},
+            {"$unwind": "$book_info"},
+            {"$project": {
+                "_id": 0,
+                "title": "$book_info.title",
+                "author": "$book_info.author",
+                "ISBN": "$book_info.ISBN",
+                "borrow_count": 1
+            }}
+        ]
+
+        try:
+            most_borrowed = list(loans_collection.aggregate(pipeline))
+            return jsonify({"success": True, "data": most_borrowed}), 200
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
 
 
