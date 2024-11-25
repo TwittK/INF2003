@@ -1,0 +1,95 @@
+/* Login container styling */
+.Login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 60px); /* Adjust height for navbar */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    box-sizing: border-box;
+}
+
+h2 {
+    margin-bottom: 20px; /* Add spacing between the title and the form */
+    color: #333;
+    font-size: 1.8rem;
+    text-align: center;
+}
+
+/* Form input fields */
+label {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+/* Submit button */
+button[type="submit"] {
+    padding: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+button[type="submit"]:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Error message */
+p {
+    color: red;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Align items in the form */
+form div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
