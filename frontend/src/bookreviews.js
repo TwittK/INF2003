@@ -1,13 +1,14 @@
 // bookreviews.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import './bookreviews.css';
 
 function BookReviews({ user }) { // Accept user as a prop
     const { bookId } = useParams();
     const [reviews, setReviews] = useState([]);
     const [bookTitle, setBookTitle] = useState(""); 
     const [reviewText, setReviewText] = useState('');
-    const [rating, setRating] = useState(5);
+    const [rating, setRating] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -61,7 +62,7 @@ function BookReviews({ user }) { // Accept user as a prop
             if (data.success) {
                 alert('Review submitted successfully!');
                 setReviewText('');
-                setRating(5);
+                setRating(0);
                 setReviews([...reviews, { reviewText, rating, username: user.name, reviewDate: new Date() }]);
             } else {
                 alert('Error submitting review: ' + data.error);
@@ -103,13 +104,24 @@ function BookReviews({ user }) { // Accept user as a prop
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
                 />
-                <div>
-                    <label>Rating:</label>
-                    <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
-                        {[1, 2, 3, 4, 5].map(num => (
-                            <option key={num} value={num}>{num}</option>
-                        ))}
-                    </select>
+                <div className='rating'>
+                {[1, 2, 3, 4, 5].map((num) => (
+                    <label key={num}>
+                        <input
+                            type="radio"
+                            name="rating"
+                            value={num}
+                            checked={rating === num}
+                            onChange={(e) => setRating(Number(e.target.value))}
+                            aria-label={`Rate ${num} out of 5`}
+                        />
+                        <span
+                            className={`heart ${num <= rating ? "active" : ""}`}
+                        >
+                            &#x2764; {/* Unicode for filled heart */}
+                        </span>
+                    </label>
+                ))}
                 </div>
                 <button onClick={submitReview}>Submit Review</button>
             </div>
