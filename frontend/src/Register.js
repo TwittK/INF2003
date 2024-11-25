@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './Register.css';
 
 function Register() {
     const [name, setName] = useState('');
@@ -36,7 +37,7 @@ function Register() {
     };
 
     return (
-        <div>
+        <div className='register-container'>
             <h2>Register</h2>
             <form onSubmit={handleRegister}>
                 <div>

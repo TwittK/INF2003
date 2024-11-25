@@ -1,0 +1,80 @@
+/* Loan Container */
+.loan-container {
+    max-width: 900px; /* Adjusted max width for wider container */
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Section Titles */
+
+.loan-section h2 {
+    font-size: 2rem;
+    color: #444; /* Neutral color for section headers */
+    margin-bottom: 15px;
+}
+
+/* No Loans Message */
+.no-loans {
+    color: #555; /* Neutral text color */
+    font-size: 1rem;
+    margin: 20px 0;
+}
+
+/* Loan List Styling */
+.loan-list, .loan-history-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Loan Card */
+.loan-card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 5px 20px 30px; /* Increased top padding for more space above the title */
+    width: 600px; /* Adjust box width if needed */
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.loan-card h3 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 20px; /* Increased margin for more space */
+    line-height: 1.5; /* Adjust line height for better readability */
+}
+
+/* Field Labels */
+.loan-card p strong {
+    color: red; /* Red for field labels like "Loan Date" */
+}
+
+/* Loan Field Content */
+.loan-card p {
+    font-size: 0.9rem;
+    color: #555;
+    margin: 8px 0; /* Added margin for consistent spacing between fields */
+}
+
+/* Return Button */
+.return-button {
+    display: block;
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.return-button:hover {
+    background-color: #45a049;
+}

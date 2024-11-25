@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './Loans.css';
 
 function Loans({ user }) {
     const [loans, setLoans] = useState([]);
@@ -88,49 +89,53 @@ function Loans({ user }) {
     
 
     return (
-        <div>
-            <h1>Your Loans</h1>
+        <div className='loan-container'>
             
             {/* Current Loans Section */}
-            <h2>Current Loans</h2>
-            {loans.length === 0 ? (
-                <p>You have no active loans at the moment.</p>
-            ) : (
-                <div className="loan-list">
-                    {loans.map((loan, index) => (
-                        <div key={index} className="loan-card">
-                            <h3>{loan.title}</h3>
-                            <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
-                            <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
-                            <p><strong>Status:</strong> {loan.loanstat}</p>
-                            {/* Return Button */}
-                            <button onClick={() => returnBook(loan.loanID, loan.bookID)}>
-                                Return Book
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
+            <div className='loan-section'>
+                <h2>Current Loans</h2>
+                {loans.length === 0 ? (
+                    <p>You have no active loans at the moment.</p>
+                ) : (
+                    <div className="loan-list">
+                        {loans.map((loan, index) => (
+                            <div key={index} className="loan-card">
+                                <h3>{loan.title}</h3>
+                                <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
+                                <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
+                                <p><strong>Status:</strong> {loan.loanstat}</p>
+                                {/* Return Button */}
+                                <button className='return-button'
+                                onClick={() => returnBook(loan.loanID, loan.bookID)}>
+                                    Return Book
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
 
             {/* Loan History Section */}
-            <h2>Loan History</h2>
-            {loanHistory.length === 0 ? (
-                <p>You have no loan history at the moment.</p>
-            ) : (
-                <div className="loan-history-list">
-                    {loanHistory.map((loan, index) => (
-                        <div key={index} className="loan-card">
-                            <h3>{loan.title}</h3>
-                            <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
-                            <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
-                            <p><strong>Status:</strong> {loan.loanstat}</p>
-                            {loan.loanstat === 'returned' && (
-                                <p><strong>Return Date:</strong> {loan.returndate ? formatDatetime(loan.returndate) : "N/A"}</p>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            )}
+            <div className='loan-section'>
+                <h2>Loan History</h2>
+                {loanHistory.length === 0 ? (
+                    <p>You have no loan history at the moment.</p>
+                ) : (
+                    <div className="loan-history-list">
+                        {loanHistory.map((loan, index) => (
+                            <div key={index} className="loan-card">
+                                <h3>{loan.title}</h3>
+                                <p><strong>Loan Date:</strong> {formatDate(loan.borrowdate)}</p>
+                                <p><strong>Due Date:</strong> {formatDate(loan.duedate)}</p>
+                                <p><strong>Status:</strong> {loan.loanstat}</p>
+                                {loan.loanstat === 'returned' && (
+                                    <p><strong>Return Date:</strong> {loan.returndate ? formatDatetime(loan.returndate) : "N/A"}</p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
