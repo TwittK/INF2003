@@ -66,6 +66,7 @@
 
 .filter-row {
   display: flex;
+  gap: 20px;
 }
 
 .filter-item {
@@ -82,7 +83,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  font-size: 15px;  /* Adjust font size for labels */
+  font-size: 1.2rem;  /* Adjust font size for labels */
   margin-right: 2px;
 }
 
@@ -121,9 +122,9 @@
 }
 
 .search-bar-center input {
-  width: 60%; /* Makes the input wider */
+  width: 50%; /* Makes the input wider */
   padding: 10px;
-  font-size: 0.8em;
+  font-size: 0.6em;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
