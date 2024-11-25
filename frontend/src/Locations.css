@@ -1,0 +1,19 @@
+.location-list {
+    list-style-type: none; /* Remove bullet points */
+    padding: 0; /* Remove default padding */
+    margin: 0 auto; /* Center align the list */
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Arrange items vertically */
+    align-items: center; /* Center the items */
+}
+
+.location-list li {
+    background-color: #f9f9f9; /* Light background color */
+    border-radius: 15px; /* Rounded corners */
+    padding: 20px; /* Add space inside the box */
+    margin: 15px 0; /* Space between the boxes */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+    max-width: 800px; /* Limit the width */
+    width: 80%;
+    text-align: center; /* Center the text */
+}
