@@ -10,9 +10,12 @@ function Navbar({ user, onLogout }) {
                 <Link to="/loans">Loans</Link>
                 <Link to="/favourites">Favourites</Link>
                 
-                {/* Show Admin Loans link only if the user is an admin */}
+                {/* Show Admin links only if the user is an admin */}
                 {user && user.userprivilege === 'ADMIN' && (
-                    <Link to="/admin/loans">Admin Loans</Link>
+                    <>
+                        <Link to="/admin/loans">Admin Loans</Link>
+                        <Link to="/admin/most_borrowed">Admin Dashboard</Link>
+                    </>
                 )}
             </div>
             

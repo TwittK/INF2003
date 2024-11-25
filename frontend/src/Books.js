@@ -24,30 +24,31 @@ function Books({ user }) {
                     page: currentPage,
                     limit: booksPerPage,
                 });
-
+    
                 const response = await fetch(`http://localhost:5000/books?${queryParams.toString()}`);
                 const data = await response.json();
-                setBooks(data);  // Set fetched books data
+    
+                // Ensure data is an array before setting it
+                if (Array.isArray(data)) {
+                    setBooks(data);
+                } else {
+                    console.error('Expected an array, got:', data);
+                    setBooks([]);
+                }
             } catch (error) {
                 console.error('Error fetching books:', error);
+                setBooks([]); // Set an empty array on error
             }
         };
-
+    
         fetchBooks();
     }, [searchQuery, selectedFormat, selectedLanguage, onlyAvailable, currentPage]);
+    
 
     // Navigate to the BookReviews page
     const viewReviews = (bookId) => {
         navigate(`/reviews/${bookId}`);
     };
-
-    useEffect(() => {
-        fetch('http://localhost:5000/books')
-            .then(response => response.json())
-            .then(data => setBooks(data))
-            .catch(error => console.error('Error fetching books:', error));
-        console.log("Logged-in user:", user);  // Check if user is being passed correctly
-    }, [user]);
 
     // Filter the data based on search query
     const filteredData = books.filter(item => {
@@ -236,7 +237,6 @@ function Books({ user }) {
                         >
                             Loan Book
                         </button>
-                        {/* Loan Button */}
                         <button 
                             onClick={() => viewReviews(item.bookID)} 
                             disabled={item.available <= 0}
@@ -259,18 +259,17 @@ function Books({ user }) {
 
 // Pagination Component
 function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
-    const pageNumbers = [];
-    const maxPageNumbersToShow = 10;
     const totalPageCount = Math.ceil(totalBooks / booksPerPage);
+    const maxPageNumbersToShow = 5; // Number of page numbers to display around the current page
+    const pageNumbers = [];
 
-    for (let i = 1; i <= totalPageCount; i++) {
-        pageNumbers.push(i);
-    }
-
+    // Calculate the range of visible pages
     const startPage = Math.max(1, currentPage - Math.floor(maxPageNumbersToShow / 2));
     const endPage = Math.min(totalPageCount, startPage + maxPageNumbersToShow - 1);
 
-    const visiblePages = pageNumbers.slice(startPage - 1, endPage);
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+    }
 
     const handlePrevious = () => {
         if (currentPage > 1) {
@@ -288,35 +287,32 @@ function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
         <nav className="pagination">
             <ul className="pagination-list">
                 <li className="page-item">
-                    <a
+                    <button
                         onClick={handlePrevious}
-                        href="#!"
+                        disabled={currentPage === 1}
                         className="page-link"
-                        style={{ visibility: currentPage === 1 ? 'hidden' : 'visible' }}
                     >
                         Previous
-                    </a>
+                    </button>
                 </li>
-                {visiblePages.map(number => (
+                {pageNumbers.map(number => (
                     <li key={number} className="page-item">
-                        <a
+                        <button
                             onClick={() => paginate(number)}
-                            href="#!"
                             className={`page-link ${number === currentPage ? 'active' : ''}`}
                         >
                             {number}
-                        </a>
+                        </button>
                     </li>
                 ))}
                 <li className="page-item">
-                    <a
+                    <button
                         onClick={handleNext}
-                        href="#!"
+                        disabled={currentPage === totalPageCount}
                         className="page-link"
-                        style={{ visibility: currentPage === totalPageCount ? 'hidden' : 'visible' }}
                     >
                         Next
-                    </a>
+                    </button>
                 </li>
             </ul>
         </nav>
@@ -324,3 +320,4 @@ function Pagination({ booksPerPage, totalBooks, paginate, currentPage }) {
 }
 
 export default Books;
+
