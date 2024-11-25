@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
+import './Books.css';
 
 function Books({ user }) {
     const [books, setBooks] = useState([]);
@@ -218,7 +219,7 @@ function Books({ user }) {
                                 )}
                             </p>
                         )}
-
+                    <div className='button-group'>
                         <a 
                             href={item.url || "#"}  // Use the Url field if available
                             target="_blank" 
@@ -244,6 +245,7 @@ function Books({ user }) {
                             View Reviews
                         </button>
                     </div>
+                </div>
                 ))}
             </div>
 

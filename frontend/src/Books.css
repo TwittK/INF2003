@@ -1,0 +1,42 @@
+.book-card a {
+    margin: 10px 0; /* Space above and below */
+    text-decoration: underline;
+    color: #007BFF;
+}
+
+.book-card a:hover {
+    text-decoration: underline;
+}
+
+.book-card button {
+    background-color: #4CAF50; /* Green button background */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    padding: 10px 15px; /* Space inside the button */
+    border-radius: 5px; /* Rounded button corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 0.9rem;
+    width: auto; /* Adjust width to fit content */
+    height: 40px; /* Fixed height for uniformity */
+    transition: background-color 0.3s; /* Smooth hover effect */
+    text-align: center; /* Center button text */
+}
+
+.book-card button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+.book-card button:disabled {
+    background-color: #ccc; /* Gray for disabled button */
+    cursor: not-allowed; /* Not-allowed cursor for disabled button */
+}
+
+.book-card .button-group {
+    display: flex; /* Flexbox for buttons */
+    flex-direction: column; /* Arrange buttons vertically */
+    align-items: center; /* Center align buttons */
+    justify-content: center; /* Center align vertically */
+    gap: 10px; /* Space between buttons */
+    margin-top: 15px; /* Space above buttons */
+    width: 100%; /* Make buttons span full width */
+}

@@ -17,3 +17,8 @@
     width: 80%;
     text-align: center; /* Center the text */
 }
+
+
+.location-list li p {
+    color: black; /* Set the location text color to black */
+}
