@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import './Favourites.css';
 
 function Favourites({ user }) {
     const [favouriteBooks, setFavouriteBooks] = useState([]);
@@ -50,16 +50,16 @@ function Favourites({ user }) {
     };
 
     return (
-        <div>
+        <div className='favourite-container'>
             <h2>Your Favourite Books</h2>
             {error ? (
                 <p>{error}</p>
             ) : favouriteBooks.length === 0 ? (
                 <p>You have no favourite books yet.</p>
             ) : (
-                <ul>
+                <ul className='favourite-list'>
                     {favouriteBooks.map(favourite => (
-                        <li key={favourite._id}>
+                        <li key={favourite._id} className='favourite-card'>
                             {favourite.book?.title || 'Unknown Title'} by {favourite.book?.author || 'Unknown Author'}
                             <button onClick={() => removeFavourite(favourite.bookID)}>Remove</button>
                         </li>
