@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './AdminLoans.css';
 
 function AdminLoans({ user }) {
     const [loans, setLoans] = useState([]);
@@ -14,7 +15,7 @@ function AdminLoans({ user }) {
     }, [user]);
 
     return (
-        <div>
+        <div className='admin-loans-page'>
             <h1>All Loans</h1>
             {loans.length === 0 ? (
                 <p>No loans found.</p>
