@@ -211,7 +211,7 @@ function Books({ user }) {
                                 )}
                             </p>
                         ) : (
-                            <p><strong>Available:</strong> 
+                            <p><strong>Available: </strong> 
                                 {item.available > 0 ? (
                                     <span>Available</span>
                                 ) : (
